@@ -1,1 +1,49 @@
 /* app global css */
+:root {
+  --q-first: #24305e;
+  --q-second: #374785;
+  --q-third: #a8d0e6;
+  --q-fourth: #f76c6c;
+  --q-fifth: #f8e9a1;
+  --q-dark: #121212;
+}
+
+.bg-first {
+  background-color: var(--q-first) !important;
+}
+
+.text-first {
+  color: var(--q-first) !important;
+}
+
+.bg-second {
+  background-color: var(--q-second) !important;
+}
+
+.text-second {
+  color: var(--q-second) !important;
+}
+
+.bg-third {
+  background-color: var(--q-third) !important;
+}
+
+.text-third {
+  color: var(--q-third) !important;
+}
+
+.bg-fourth {
+  background-color: var(--q-fourth) !important;
+}
+
+.text-fourth {
+  color: var(--q-fourth) !important;
+}
+
+.bg-fifth {
+  background-color: var(--q-fifth) !important;
+}
+
+.text-fifth {
+  color: var(--q-fifth) !important;
+}
