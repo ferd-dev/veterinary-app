@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { Notify } from "quasar";
+import authService from "../services/authService";
 import axios from "axios";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -21,28 +22,16 @@ export const useAuthStore = defineStore("auth", () => {
     setAuthHeader(token.value);
   }
 
-  const login = async ({ email, password }) => {
+  const login = async (credentials) => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/v1/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await authService.login(credentials);
 
       const { access_token, user } = response.data.data;
       const newToken = access_token;
       const userData = user;
 
-      localStorage.setItem("token", newToken);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      token.value = newToken;
-      user.value = userData;
-
-      // Configurar el header de autorización para futuras peticiones
-      setAuthHeader(newToken);
+      // Persistir datos
+      _setUserData(newToken, userData);
 
       Notify.create({
         type: "positive",
@@ -50,60 +39,45 @@ export const useAuthStore = defineStore("auth", () => {
         position: "top",
       });
     } catch (error) {
-      let errorMessage = "Error al iniciar sesión";
-      let errorDetails = "";
-
-      if (error.response && error.response.data && error.response.data.error) {
-        const { message, details } = error.response.data.error;
-        errorMessage = message || errorMessage;
-        errorDetails = details || "";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      Notify.create({
-        type: "negative",
-        message: errorMessage,
-        caption: errorDetails,
-        position: "top",
-        timeout: 3000,
-      });
-
+      _handleError(error, "Error al iniciar sesión");
       throw error;
     }
   };
 
-  // Función para verificar si el token es válido
+  /**
+   * Verifica si el usuario está autenticado correctamente
+   * @returns {Promise<boolean>} Estado de autenticación
+   */
   const checkAuth = async () => {
     if (!token.value) return false;
 
     try {
-      // Opcional: verificar validez del token en el servidor
-      await axios.get("http://127.0.0.1:8000/api/v1/auth/user");
+      const response = await authService.getCurrentUser();
+
+      if (response.data.success === false) {
+        throw new Error("Token inválido");
+      }
+
       return true;
     } catch (error) {
-      console.error("Token inválido:", error);
-      // Si hay error, el token es inválido, hacer logout
+      console.error("Error de autenticación:", error);
       await logout();
       return false;
     }
   };
 
+  /**
+   * Maneja el cierre de sesión
+   */
   const logout = async () => {
     try {
-      // Opcional: realizar petición de logout al backend
       if (token.value) {
-        await axios.post("http://127.0.0.1:8000/api/v1/auth/logout");
+        await authService.logout();
       }
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     } finally {
-      // Limpiar datos independientemente del resultado
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      token.value = null;
-      user.value = null;
-      setAuthHeader(null);
+      _clearUserData();
 
       Notify.create({
         type: "info",
@@ -113,6 +87,57 @@ export const useAuthStore = defineStore("auth", () => {
 
       router.push("/login");
     }
+  };
+
+  /**
+   * Almacena los datos del usuario en localStorage y en el estado
+   * @param {string} newToken - Token de autenticación
+   * @param {Object} userData - Datos del usuario
+   * @private
+   */
+  const _setUserData = (newToken, userData) => {
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+    token.value = newToken;
+    user.value = userData;
+  };
+
+  /**
+   * Limpia los datos del usuario
+   * @private
+   */
+  const _clearUserData = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    token.value = null;
+    user.value = null;
+  };
+
+  /**
+   * Maneja los errores de forma consistente
+   * @param {Error} error - Error capturado
+   * @param {string} defaultMessage - Mensaje por defecto
+   * @private
+   */
+  const _handleError = (error, defaultMessage = "Error en la operación") => {
+    let errorMessage = defaultMessage;
+    let errorDetails = "";
+
+    if (error.response && error.response.data && error.response.data.error) {
+      const { message, details } = error.response.data.error;
+      errorMessage = message || errorMessage;
+      errorDetails = details || "";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    Notify.create({
+      type: "negative",
+      message: errorMessage,
+      caption: errorDetails,
+      position: "top",
+      timeout: 5000,
+    });
   };
 
   return {
