@@ -95,7 +95,7 @@ const linksListAccesos = [
   {
     title: "Roles y Permisos",
     icon: "admin_panel_settings",
-    link: "/roles",
+    link: "/roles-permisos",
   },
   {
     title: "Staffs",

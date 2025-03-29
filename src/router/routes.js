@@ -12,9 +12,9 @@ const requireAuth = (to, from, next) => {
 const requireNoAuth = (to, from, next) => {
   const authStore = useAuthStore();
   if (authStore.isAuthenticated()) {
-    next("/dashboard"); // Redirige al dashboard si ya está autenticado
+    next("/dashboard");
   } else {
-    next(); // Continúa con la navegación si no está autenticado
+    next();
   }
 };
 
@@ -33,6 +33,12 @@ const routes = [
         component: () => import("../modules/dashboard/pages/DashboardPage.vue"),
         beforeEnter: requireAuth,
       },
+      {
+        path: "/roles-permisos",
+        component: () =>
+          import("../modules/roles-permissions/pages/RolesPermissionsPage.vue"),
+        beforeEnter: requireAuth,
+      },
     ],
   },
   {
@@ -47,8 +53,6 @@ const routes = [
     ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
