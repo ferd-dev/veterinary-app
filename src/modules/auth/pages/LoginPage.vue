@@ -1,8 +1,11 @@
 <template>
   <q-page class="flex flex-center">
     <q-card class="q-pa-md shadow-2" style="width: 350px">
+      <q-card-section class="q-pt-lg flex justify-center">
+        <q-img src="logo1.jpg" alt="Logo" spinner-color="primary" width="60%" />
+      </q-card-section>
       <q-card-section>
-        <div class="text-h6">Iniciar Sesión</div>
+        <div class="text-h6 text-center">Iniciar Sesión</div>
       </q-card-section>
       <q-card-section>
         <q-form @submit="handleLogin">
@@ -10,22 +13,38 @@
             v-model="email"
             label="Correo Electrónico"
             type="email"
+            filled
             lazy-rules
             :rules="[(val) => !!val || 'El correo es obligatorio']"
-          />
+          >
+            <template v-slot:prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
           <q-input
             v-model="password"
+            :type="isPwd ? 'password' : 'text'"
             label="Contraseña"
-            type="password"
+            filled
             lazy-rules
             :rules="[(val) => !!val || 'La contraseña es obligatoria']"
             class="q-mt-md"
-          />
+          >
+            <template v-slot:prepend>
+              <q-icon name="lock" />
+            </template>
+            <template v-slot:append>
+              <q-icon
+                :name="isPwd ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer"
+                @click="isPwd = !isPwd"
+              />
+            </template>
+          </q-input>
           <q-btn
             type="submit"
             label="Ingresar"
-            color="primary"
-            class="full-width q-mt-md"
+            class="full-width q-mt-lg bg-first text-white"
             :loading="loading"
           />
         </q-form>
@@ -38,10 +57,10 @@
 import { ref } from "vue";
 import { useAuthStore } from "../store/authStore";
 import { useRouter } from "vue-router";
-import { Notify } from "quasar";
 
-const email = ref("");
-const password = ref("");
+const email = ref("tester@example.com");
+const password = ref("password");
+const isPwd = ref(true);
 const loading = ref(false);
 const authStore = useAuthStore();
 const router = useRouter();
@@ -50,13 +69,10 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     await authStore.login({ email: email.value, password: password.value });
-    Notify.create({ type: "positive", message: "Inicio de sesión exitoso" });
+
     router.push("/dashboard");
   } catch (error) {
-    Notify.create({
-      type: "negative",
-      message: error.message || "Error en inicio de sesión",
-    });
+    console.error(error);
   } finally {
     loading.value = false;
   }
