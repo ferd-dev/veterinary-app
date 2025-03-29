@@ -16,38 +16,60 @@
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Menu </q-item-label>
+      <q-scroll-area
+        style="
+          height: calc(100% - 150px);
+          margin-top: 150px;
+          border-right: 1px solid #ddd;
+        "
+      >
+        <q-list>
+          <q-item-label header> Menu </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+          <EssentialLink
+            v-for="link in linksList"
+            :key="link.title"
+            v-bind="link"
+          />
 
-        <q-item-label header> Accesos </q-item-label>
+          <q-item-label header> Accesos </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksListAccesos"
-          :key="link.title"
-          v-bind="link"
-        />
+          <EssentialLink
+            v-for="link in linksListAccesos"
+            :key="link.title"
+            v-bind="link"
+          />
 
-        <q-item-label header> Gestión </q-item-label>
+          <q-item-label header> Gestión </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksListGestion"
-          :key="link.title"
-          v-bind="link"
-        />
-        <q-item-label header> Agenda </q-item-label>
+          <EssentialLink
+            v-for="link in linksListGestion"
+            :key="link.title"
+            v-bind="link"
+          />
+          <q-item-label header> Agenda </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksListAgenda"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+          <EssentialLink
+            v-for="link in linksListAgenda"
+            :key="link.title"
+            v-bind="link"
+          />
+        </q-list>
+      </q-scroll-area>
+
+      <q-img
+        class="absolute-top"
+        src="https://cdn.quasar.dev/img/material.png"
+        style="height: 150px"
+      >
+        <div class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+          </q-avatar>
+          <div class="text-weight-bold">Razvan Stoenescu</div>
+          <div>@rstoenescu</div>
+        </div>
+      </q-img>
     </q-drawer>
 
     <q-page-container>
@@ -59,6 +81,7 @@
 <script setup>
 import { ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { useAuthStore } from "src/modules/auth/store/authStore";
 
 const linksList = [
   {
@@ -120,11 +143,26 @@ const linksListAgenda = [
     icon: "history_edu",
     link: "/clinical-history",
   },
+  {
+    title: "Salir",
+    icon: "logout",
+    link: "/",
+    class: "text-red",
+    onclick: logout,
+  },
 ];
 
 const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+async function logout() {
+  try {
+    await useAuthStore().logout();
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
 }
 </script>

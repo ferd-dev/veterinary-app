@@ -136,7 +136,7 @@ export const useAuthStore = defineStore("auth", () => {
       message: errorMessage,
       caption: errorDetails,
       position: "top",
-      timeout: 5000,
+      timeout: 3000,
     });
   };
 
