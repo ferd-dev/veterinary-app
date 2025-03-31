@@ -21,7 +21,6 @@
             label="Buscar"
             debounce="300"
             v-model="buscar"
-            @update:model-value="filtrarRoles"
           />
 
           <q-btn
@@ -39,7 +38,7 @@
 
     <q-card class="q-mt-md">
       <q-table
-        :rows="rolesFiltrados"
+        :rows="roles"
         :columns="columns"
         row-key="id"
         :loading="cargandoRoles"
@@ -60,7 +59,7 @@
             </div>
           </q-td>
         </template>
-        <!-- Columna de acciones -->
+
         <template v-slot:body-cell-acciones="props">
           <q-td :props="props">
             <q-btn
@@ -77,7 +76,7 @@
               dense
               color="negative"
               icon="delete"
-              @click="confirmarEliminarRol(props.row)"
+              @click="eliminarRol(props.row)"
             />
           </q-td>
         </template>
@@ -93,7 +92,6 @@
 import { ref, onMounted, computed } from "vue";
 import { useQuasar } from "quasar";
 import AddRoleModal from "../components/AddRoleModal.vue";
-import { data } from "autoprefixer";
 
 const $q = useQuasar();
 const mostrarDialogRol = ref(false);
@@ -118,18 +116,6 @@ const roles = ref([
     permisos: ["ver_usuarios", "ver_roles"],
   },
 ]);
-
-// Roles filtrados según la búsqueda
-const rolesFiltrados = computed(() => {
-  if (!buscar.value) return roles.value;
-
-  const busqueda = buscar.value.toLowerCase();
-  return roles.value.filter(
-    (rol) =>
-      rol.nombre.toLowerCase().includes(busqueda) ||
-      rol.descripcion.toLowerCase().includes(busqueda)
-  );
-});
 
 const columns = [
   {
@@ -162,16 +148,10 @@ const columns = [
   },
 ];
 
-// Función para cargar los roles (simulación)
 const cargarRoles = async () => {
   cargandoRoles.value = true;
 
   try {
-    // Aquí iría la llamada a la API para obtener los roles
-    // const response = await api.obtenerRoles();
-    // roles.value = response.data;
-
-    // Simulamos un retardo para mostrar el loading
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (error) {
     $q.notify({
@@ -185,31 +165,18 @@ const cargarRoles = async () => {
   }
 };
 
-// Función para filtrar roles
-const filtrarRoles = () => {
-  // La búsqueda se maneja con el computed rolesFiltrados
-};
-
-// Función para abrir el diálogo de creación de rol
 const abrirDialogRol = () => {
   mostrarDialogRol.value = true;
 };
 
-// Función que se ejecuta cuando se crea un nuevo rol
 const onRolCreado = (nuevoRol) => {
-  // Asignar un ID al nuevo rol (esto normalmente vendría del backend)
   const id = roles.value.length + 1;
 
-  // Agregar fechaCreacion
-  // const fechaActual = new Date().toISOString().split("T")[0];
-
-  // Agregar el nuevo rol al array
   roles.value.push({
     id,
     ...nuevoRol,
   });
 
-  // Mostrar notificación de éxito
   $q.notify({
     color: "positive",
     position: "top",
@@ -219,7 +186,6 @@ const onRolCreado = (nuevoRol) => {
   });
 };
 
-// Función para editar un rol (puedes implementarla según tus necesidades)
 const editarRol = (rol) => {
   $q.notify({
     color: "info",
@@ -227,30 +193,17 @@ const editarRol = (rol) => {
     message: `Editando rol: ${rol.nombre}`,
     icon: "edit",
   });
-  // Aquí puedes implementar la lógica para editar roles
 };
 
-// Función para confirmar la eliminación de un rol
-const confirmarEliminarRol = (rol) => {
-  $q.dialog({
-    title: "Confirmar eliminación",
-    message: `¿Estás seguro de que deseas eliminar el rol "${rol.nombre}"?`,
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    // Eliminar el rol del array
-    roles.value = roles.value.filter((r) => r.id !== rol.id);
-
-    $q.notify({
-      color: "positive",
-      position: "top",
-      message: `Rol "${rol.nombre}" eliminado correctamente`,
-      icon: "check_circle",
-    });
+const eliminarRol = (rol) => {
+  $q.notify({
+    color: "negative",
+    position: "top",
+    message: `Eliminar rol: ${rol.nombre}`,
+    icon: "edit",
   });
 };
 
-// Cargar los roles al montar el componente
 onMounted(() => {
   cargarRoles();
 });

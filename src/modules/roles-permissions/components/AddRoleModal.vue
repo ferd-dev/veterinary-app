@@ -82,7 +82,6 @@ const loading = ref(false);
 
 const isOpen = ref(props.modelValue);
 
-// Observador para actualizar el estado del diálogo cuando cambia el prop modelValue
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -90,7 +89,6 @@ watch(
   }
 );
 
-// Observador para emitir eventos cuando cambia el estado del diálogo
 watch(
   () => isOpen.value,
   (newVal) => {
@@ -98,20 +96,15 @@ watch(
   }
 );
 
-// Array para almacenar los permisos seleccionados
 const selectedPermisos = ref([]);
 
-// Datos del formulario
 const rolData = ref({
   nombre: "",
 });
 
-// Opciones de permisos (desde el import)
 const opcionesPermisos = permissions;
 
-// Función para enviar el formulario
 const onSubmit = async () => {
-  // Validar el formulario
   const isValid = await rolForm.value.validate();
 
   if (!isValid) {
@@ -127,24 +120,17 @@ const onSubmit = async () => {
   loading.value = true;
 
   try {
-    // Preparar los datos del rol con los permisos seleccionados
     const nuevoRol = {
       nombre: rolData.value.nombre,
-      permisos: [...selectedPermisos.value], // Usar el array de permisos seleccionados
+      permisos: [...selectedPermisos.value],
     };
 
-    console.log(nuevoRol);
-
-    // Simulamos una operación asíncrona
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Emitir evento para notificar que se ha creado un rol
     emit("rolCreated", nuevoRol);
 
-    // Cerrar el diálogo
     isOpen.value = false;
 
-    // Notificar éxito
     $q.notify({
       color: "positive",
       position: "top",
@@ -164,13 +150,10 @@ const onSubmit = async () => {
   }
 };
 
-// Función para manejar el cierre del diálogo
 const onDialogHide = () => {
-  // Restablecer el formulario al cerrar el diálogo
   rolData.value = {
     nombre: "",
   };
-  // Limpiar los permisos seleccionados
   selectedPermisos.value = [];
 };
 </script>
